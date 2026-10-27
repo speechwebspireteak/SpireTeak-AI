@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SpireTeak AI</title>
+<meta name="description" content="SpireTeak AI เครื่องมือช่วยฝึกออกเสียงภาษาไทย ดูลิ้น ฟัน กราม และริมฝีปากขยับตามเสียงของแต่ละคำผ่านโมเดล 3 มิติ">
+<meta name="theme-color" content="#0e8f8a">
+<meta property="og:type" content="website"><meta property="og:title" content="SpireTeak AI"><meta property="og:description" content="เพราะทุกเสียงมีค่า ฝึกออกเสียงภาษาไทยด้วยโมเดล 3 มิติ">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230e8f8a'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%23fff'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500&family=Prompt:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e9f3f6;--fg:#12303f;--card:#fff;--ac:#0e8f8a;--hi:#f7b32b;--mu:#587080;--bd:#cfe2e8;--cv:#d7ebf1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1e27;--fg:#e6f2f6;--card:#172b37;--ac:#3cc7bf;--mu:#8fb0bf;--bd:#27414f;--cv:#1d3643}}
+:root[data-theme="dark"]{--bg:#0f1e27;--fg:#e6f2f6;--card:#172b37;--ac:#3cc7bf;--mu:#8fb0bf;--bd:#27414f;--cv:#1d3643}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.65 "IBM Plex Sans Thai","Noto Sans Thai",system-ui,sans-serif}
+main{max-width:920px;margin:0 auto;padding:14px}
+h1{font-size:clamp(1.6rem,4.6vw,2.4rem);line-height:1.25;font-weight:700;letter-spacing:-.01em;margin:12px 0 4px}.b1{stroke:var(--ac)}.b2{stroke:var(--hi)}p{margin:.3rem 0}
+.sub{color:var(--mu);font-size:.9rem}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+button,input{font:inherit;color:inherit}
+button{border:1.5px solid var(--bd);background:var(--card);border-radius:12px;padding:7px 14px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+button.on{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+button:disabled{opacity:.5;cursor:not-allowed}
+#q{flex:1;min-width:160px;padding:10px 14px;border:2px solid var(--bd);border-radius:14px;background:var(--card);font-size:1.15rem}
+#go{background:var(--hi);border-color:var(--hi);color:#2a1d00;font-weight:700;font-size:1.1rem;padding:9px 22px}
+#stage{position:relative;height:clamp(320px,56vh,540px);border-radius:20px;background:var(--cv);overflow:hidden;touch-action:none;cursor:grab}
+#stage canvas{display:block}
+#hint{position:absolute;left:12px;bottom:8px;font-size:.8rem;color:var(--mu)}
+.card{background:var(--card);border:1.5px solid var(--bd);border-radius:16px;padding:12px 16px;margin:10px 0}
+#now{font-size:1.1rem;min-height:3.2em}
+#now b{font-size:1.5rem;color:var(--ac);margin-right:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:3px 11px;border-radius:99px;background:var(--cv);font-size:.95rem}
+.chip.on{background:var(--hi);color:#2a1d00;font-weight:700}
+.leg{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--mu)}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+nav{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:8px 14px;background:var(--card);border-bottom:1.5px solid var(--bd)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:1.2rem;margin-right:auto}
+nav button{border:0;background:none;border-radius:10px;padding:6px 12px}nav button.on{background:var(--ac);color:#fff}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:12px 0}
+.mode{text-align:left;padding:14px 16px;border-radius:16px;display:flex;flex-direction:column;gap:4px}.mode b{font-size:1.1rem}.mode span{color:var(--mu);font-size:.9rem}
+.mode.sel{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac)}
+.g{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.9rem;color:var(--mu);margin-top:4px}
+section[hidden],div[hidden],p[hidden]{display:none}
+li{margin:.35rem 0}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+nav[hidden]{display:none}
+h1,h2,h3,.brand,#start,.seg button{font-family:"Prompt","IBM Plex Sans Thai",system-ui,sans-serif}
+h1{font-weight:600}
+button.brand{border:0;background:none;padding:0;cursor:pointer;color:inherit;border-radius:0}
+.land{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
+.big{font-size:clamp(2.8rem,12vw,5.2rem);margin:0;line-height:1.1}
+.tag{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;margin:0;color:var(--ac);font-weight:500;font-size:1.15rem}
+.tag i{width:1.5px;height:1.1em;background:var(--bd)}
+#start{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600;font-size:1.1rem;padding:11px 34px;border-radius:99px;margin-top:10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}.top h2{margin:0;font-size:1.2rem}
+.seg{display:inline-flex;border:1.5px solid var(--bd);border-radius:99px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:none;color:var(--mu);font-size:.8rem;padding:3px 12px}
+.seg button.sel{background:var(--ac);color:#fff}
+.note{font-size:.85rem;color:var(--mu);margin:4px 0}
+.search{display:flex;gap:10px;margin:14px 0 6px}.search #q{font-size:1.25rem;padding:14px 20px;border-radius:16px;min-width:0}.search #go{padding:12px 30px;border-radius:16px}
+.ex{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.ex button{border:0;background:var(--cv);color:var(--mu);font-size:.8rem;padding:2px 11px;border-radius:99px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}.tools button{font-size:.85rem;padding:5px 12px}.tools .sp{flex:1}
+.lbl{position:absolute;display:none;padding:2px 10px;border-radius:99px;background:var(--card);border:1.5px solid var(--bd);font-size:.8rem;white-space:nowrap;pointer-events:none}
+#lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.doc h3{display:flex;align-items:center;gap:10px;margin:26px 0 8px}.n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ac);color:#fff;font-size:.9rem}
+dl{display:grid;grid-template-columns:minmax(110px,170px) 1fr;gap:10px 18px;margin:8px 0}dt{font-weight:500}dd{margin:0;color:var(--mu)}dd b{color:var(--fg)}
+@media(max-width:560px){dl{grid-template-columns:1fr;gap:2px}dd{margin-bottom:8px}}
+blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid var(--ac);color:var(--mu)}
+.devs{display:flex;flex-wrap:wrap;gap:10px}.dev{border:1.5px solid var(--bd);border-radius:14px;padding:10px 16px;background:var(--card)}.dev small{display:block;color:var(--mu)}
+.warn{max-width:34em;text-align:left;border:1.5px solid #d93a3a;background:#fdeaea;color:#8a1c1c;border-radius:14px;padding:12px 16px;font-size:.9rem}.warn p{margin:4px 0 0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .warn{background:#3a1b1e;color:#ffb4b4;border-color:#e25c5c}}
+</style></head>
+<body>
+<nav id="nav" hidden><button class="brand" id="home" aria-label="กลับหน้าต้อนรับ"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#0e8f8a"/><circle cx="16" cy="16" r="6.5" fill="#fff"/></svg>SpireTeak AI</button>
+ <button id="t1" class="on">ห้องฝึก</button><button id="t2">วิธีใช้งาน</button><button id="t3">เกี่ยวกับผลงาน</button></nav>
+<main>
+<section id="s0"><div class="land"><div class="warn" role="alert"><b>ประกาศ: เว็บไซต์อยู่ระหว่างการปรับปรุงและพัฒนา</b><p>การทำงานบางส่วนอาจยังไม่เสถียร สามารถใช้งานได้แต่ยังไม่สมบูรณ์ ผู้ใช้อาจพบโมเดล 3 มิติที่มีลักษณะผิดปกติและการเคลื่อนไหวของอวัยวะที่ยังไม่สมบูรณ์ เนื่องจากระบบหลังบ้านอยู่ระหว่างการปรับปรุงข้อมูล คาดว่าจะสามารถใช้งานเวอร์ชันสมบูรณ์ได้ในวันที่ 25 ธันวาคม 2569 ขออภัยในความไม่สะดวก</p></div><svg class="logo" width="96" height="96" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#0e8f8a"/><circle cx="16" cy="16" r="6.5" fill="#fff"/></svg><h1 class="big">SpireTeak AI</h1>
+<p class="tag"><span>Every Sound Matters</span><i></i><span>เพราะทุกเสียงมีค่า</span></p>
+<button id="start">เริ่มใช้งาน</button></div></section>
+
+<section id="s1" hidden>
+ <div class="top"><h2>ห้องฝึกออกเสียง</h2><div class="seg" role="group" aria-label="โหมด"><button data-m="3d" class="sel">โมเดล 3 มิติ</button><button data-m="robot">หุ่นยนต์</button></div></div>
+ <div class="card" id="robo" hidden><p style="margin:0 0 8px"><b>กรุณากดเชื่อมต่อบลูทูธกับหุ่นยนต์</b></p><button id="btconn">เชื่อมต่อบลูทูธ</button> <span id="btmsg" class="sub"></span></div>
+ <div class="search"><input id="q" placeholder="พิมพ์คำที่อยากฝึก เช่น สวัสดี" aria-label="คำที่ต้องการฝึก" autocomplete="off"><button id="go">พูด</button></div>
+ <div class="ex" id="ex"></div>
+ <div id="stage"><span id="hint">ลากเพื่อหมุน เลื่อนลูกกลิ้งเพื่อซูม</span></div>
+ <div class="tools"><button data-y="0">ด้านข้าง</button><button data-y="-0.6">เฉียง</button><button data-y="-1.45">ด้านหน้า</button><span class="sp"></span>
+  <button id="lab" aria-pressed="false">ชื่ออวัยวะ</button><label><input type="checkbox" id="slow"> ขยับช้า</label></div>
+ <div class="card"><div id="now">พิมพ์คำหรือกดคำตัวอย่าง แล้วกด “พูด”</div><div class="chips" id="chips"></div></div>
+ <div class="leg"><span><i class="dot" style="background:#ffd24a"></i>จุดที่ลิ้นแตะ</span><span><i class="dot" style="background:#ff9f1c"></i>เสียงก้อง (เส้นเสียงสั่น)</span><span><i class="dot" style="background:#7cc4ff"></i>ลมที่พ่นออก</span></div>
+</section>
+
+<section id="s2" hidden><div class="card doc">
+<h2>วิธีใช้งาน</h2>
+<p class="sub">SpireTeak AI ช่วยฝึกออกเสียงภาษาไทย พิมพ์คำที่อยากพูด แล้วดูโมเดลศีรษะ 3 มิติที่เปิดด้านข้าง ขยับอวัยวะออกเสียงทีละเสียง พร้อมฟังเสียงตัวอย่าง อ่านทั้ง 3 ส่วนด้านล่างก่อนเริ่มใช้</p>
+<h3><span class="n">1</span>รู้จักส่วนต่างๆ ของเว็บ</h3>
+<dl>
+<dt>แท็บด้านบน</dt><dd>มี 3 แท็บ <b>ห้องฝึก</b> คือหน้าหลักที่ใช้ฝึก <b>วิธีใช้งาน</b> คือหน้านี้ และ <b>เกี่ยวกับผลงาน</b> บอกที่มา วัตถุประสงค์ และผู้จัดทำ กดโลโก้มุมซ้ายบนเพื่อกลับไปหน้าต้อนรับ</dd>
+<dt>เลือกโหมด</dt><dd>อยู่มุมขวาบนของห้องฝึก มี 2 โหมด <b>โมเดล 3 มิติ</b> ใช้ได้ทันที ส่วน <b>หุ่นยนต์</b> ยังใช้งานจริงไม่ได้ในตอนนี้ เมื่อเปิดใช้ จะเชื่อมต่อกับหุ่นยนต์ผ่านบลูทูธ เพื่อให้หุ่นยนต์ขยับปากตามคำเดียวกับที่เห็นบนจอ</dd>
+<dt>ช่องค้นหา</dt><dd>พิมพ์คำที่ต้องการฝึก แล้วกดปุ่ม <b>พูด</b> หรือกด Enter บนคีย์บอร์ด รองรับภาษาไทยเป็นหลัก ส่วนภาษาอังกฤษขยับแบบคร่าวๆ</dd>
+<dt>คำตัวอย่าง</dt><dd>อยู่ใต้ช่องค้นหา กดที่คำเพื่อเริ่มได้เลยโดยไม่ต้องพิมพ์</dd>
+<dt>โมเดล 3 มิติ</dt><dd>ศีรษะที่เปิดแก้มด้านหนึ่ง เห็นริมฝีปาก ฟัน กราม ลิ้น เพดานปาก และเส้นเสียง ที่ขยับตามเสียงของคำที่ค้นหา ลากเพื่อหมุน เลื่อนลูกกลิ้งเพื่อซูม</dd>
+<dt>ปุ่มมุมมอง</dt><dd>เลือกดูด้านข้าง เฉียง หรือด้านหน้า ด้านข้างและเฉียงเป็นมุมที่เห็นอวัยวะด้านในชัดที่สุด</dd>
+<dt>ปุ่มชื่ออวัยวะ</dt><dd>กดเพื่อเปิดป้ายชื่อพร้อมเส้นชี้ไปที่อวัยวะแต่ละส่วน เช่น ริมฝีปาก ฟัน ปุ่มเหงือก เพดานแข็ง เพดานอ่อน ปลายลิ้น กลางลิ้น โคนลิ้น กราม และเส้นเสียง กดอีกครั้งเพื่อปิด ป้ายจะแสดงเมื่อมองจากมุมที่เห็นด้านใน</dd>
+<dt>ปุ่มขยับช้า</dt><dd>เพิ่มเวลาให้แต่ละเสียงและทำให้เสียงพูดช้าลง เหมาะกับการดูทีละขั้น</dd>
+<dt>กล่องใต้โมเดล</dt><dd>บอกเสียงที่กำลังออก คำอธิบายสั้นๆ ว่ากราม ริมฝีปาก ลม และคอกำลังทำอะไร และแถวเรียงเสียงทั้งหมดของคำ โดยเสียงที่กำลังเล่นจะเป็นสีเหลือง</dd>
+</dl>
+<h3><span class="n">2</span>วิธีฝึกในห้องฝึกออกเสียง</h3>
+<p>ห้องฝึกใช้ดูว่าแต่ละเสียงในคำต้องวางลิ้น ริมฝีปาก และกรามอย่างไร เพื่อให้ผู้ฝึกเลียนแบบได้ โดยไม่ต้องพึ่งการฟังอย่างเดียว</p>
+<ol>
+<li>ที่ห้องฝึก พิมพ์คำศัพท์ที่ต้องการฝึกลงในช่องค้นหา แล้วกดปุ่มพูดหรือกด Enter ถ้าไม่อยากพิมพ์ กดคำตัวอย่างใต้ช่องค้นหาแทนก็ได้</li>
+<li>ดูโมเดล 3 มิติขยับอวัยวะออกเสียงทีละเสียง พร้อมฟังเสียงพูดตัวอย่าง ควรเปิดเสียงในเครื่องไว้</li>
+<li>สังเกตตำแหน่งริมฝีปาก ลิ้น และลมที่ออกมา แล้วลองพูดตามช้าๆ ถ้าอยากดูซ้ำ กดพูดอีกครั้ง หรือเปิดชื่ออวัยวะเพื่อดูว่าส่วนไหนคือส่วนไหน</li>
+<li>ถ้าคำไหนขยับไม่ตรงกับเสียงที่ได้ยิน พิมพ์ “คำจริง=คำอ่าน” เช่น ธนาคาร=ทะนาคาน เสียงพูดจะใช้คำจริง ส่วนปากขยับตามคำอ่านที่เขียน</li>
+</ol>
+<h3><span class="n">3</span>วิธีอ่านโมเดล</h3>
+<dl>
+<dt>เม็ดลมสีฟ้า</dt><dd>ลมที่พ่นออกจากปาก ลมแรงสำหรับเสียงพ่นลม เช่น ข ค ผ พ ท ถ ช ฉ และลมแผ่วสำหรับเสียง ส ฟ ห</dd>
+<dt>จุดสีส้มที่คอ</dt><dd>เส้นเสียงสั่น เป็นเสียงก้อง เช่นสระและเสียง ม น ง</dd>
+<dt>จุดสีเหลืองในปาก</dt><dd>จุดที่ลิ้นแตะ เช่น ปุ่มเหงือกเมื่อออกเสียง ท น ล และเพดานอ่อนเมื่อออกเสียง ก ค ง</dd>
+<dt>ริมฝีปากและกราม</dt><dd>ปิดสนิทสำหรับเสียง ป บ พ ม ริมฝีปากล่างแตะฟันบนสำหรับ ฟ ห่อยื่นสำหรับ อู โอ และอ้ากว้างสำหรับ อา</dd>
+<dt>ลิ้น</dt><dd>ยกสูงหรือต่ำ ดันไปหน้าหรือหลังตามเสียง เช่น ปลายลิ้นแตะปุ่มเหงือกเมื่อออกเสียง ท น ล และโคนลิ้นยกแตะเพดานอ่อนเมื่อออกเสียง ก ค</dd>
+</dl>
+<blockquote>โมเดลนี้เป็นการจำลองโดยประมาณเพื่อช่วยฝึก ไม่ใช่เครื่องมือวินิจฉัยหรือรักษา ผู้ที่ต้องการแก้ไขการพูดควรปรึกษานักแก้ไขการพูด</blockquote>
+</div></section>
+
+<section id="s3" hidden><div class="card doc">
+<h2>เกี่ยวกับผลงาน</h2>
+<h3>ที่มาและความสำคัญของผลงาน</h3>
+<p>ปัจจุบันการสื่อสารมีบทบาทสำคัญต่อการดำรงชีวิต การศึกษา การประกอบอาชีพ และการมีส่วนร่วมในสังคม โดยเฉพาะความสามารถในการพูดและการออกเสียง ซึ่งเป็นองค์ประกอบสำคัญในการถ่ายทอดความคิด ความต้องการ และการสร้างปฏิสัมพันธ์กับผู้อื่น อย่างไรก็ตาม ผู้ที่มีความผิดปกติด้านการพูดและการออกเสียงยังคงเป็นกลุ่มที่ต้องได้รับการส่งเสริมและฝึกฝนอย่างเหมาะสม โดยเฉพาะเด็กที่อยู่ในช่วงพัฒนาทักษะทางภาษาและการสื่อสาร หากไม่ได้รับการดูแลอย่างเหมาะสม อาจส่งผลต่อการเรียนรู้ ความมั่นใจ และการสื่อสารในชีวิตประจำวัน</p>
+<p>การฝึกและแก้ไขความผิดปกติด้านการพูดจำเป็นต้องอาศัยความรู้เฉพาะทางและการประเมินจากนักแก้ไขการพูด ซึ่งมีบทบาทสำคัญในการวิเคราะห์สาเหตุ ประเมินความสามารถ วางแผนการฝึก และปรับวิธีการให้เหมาะสมกับแต่ละบุคคล อย่างไรก็ตาม การเข้าถึงบริการดังกล่าวยังมีข้อจำกัดสำหรับบางพื้นที่ โดยเฉพาะชุมชนที่มีผู้เชี่ยวชาญไม่เพียงพอ ประกอบกับการเข้ารับบริการอย่างต่อเนื่องอาจมีค่าใช้จ่ายและข้อจำกัดด้านเวลาและการเดินทาง ทำให้ผู้ที่ต้องการฝึกออกเสียงบางส่วนอาจไม่สามารถเข้าถึงการฝึกได้อย่างสม่ำเสมอ</p>
+<p>นอกจากการได้รับคำแนะนำจากผู้เชี่ยวชาญแล้ว การฝึกออกเสียงอย่างต่อเนื่องยังจำเป็นต้องอาศัยการฝึกซ้ำด้วยตนเอง โดยผู้ฝึกจำเป็นต้องเข้าใจว่าเสียงแต่ละเสียงเกิดจากการทำงานของอวัยวะใด และอวัยวะเหล่านั้นต้องอยู่ในตำแหน่งหรือเคลื่อนไหวอย่างไร แต่ข้อมูลดังกล่าวมักอยู่ในรูปแบบคำอธิบาย ภาพนิ่ง หรือสื่อที่ผู้เรียนต้องจินตนาการตาม จึงอาจทำให้การทำความเข้าใจกลไกการออกเสียงเป็นเรื่องยาก โดยเฉพาะสำหรับผู้เรียนที่ต้องอาศัยการมองเห็นและการสังเกตประกอบการเรียนรู้</p>
+<p>จากปัญหาดังกล่าวจึงเกิดแนวคิดในการพัฒนา <b>SpireTeak</b> เครื่องมือช่วยฝึกการออกเสียงที่นำเทคโนโลยีดิจิทัลมาประยุกต์ใช้เพื่อเพิ่มทางเลือกในการเรียนรู้และฝึกฝน โดยผู้ใช้สามารถค้นหาคำศัพท์ผ่านเว็บไซต์ ระบบจะแสดงเสียงของคำศัพท์พร้อมข้อมูลและแบบจำลองการเคลื่อนไหวของอวัยวะที่เกี่ยวข้องกับการออกเสียง เพื่อให้ผู้ใช้สามารถเชื่อมโยงระหว่างเสียงที่ได้ยินกับการเคลื่อนไหวของอวัยวะที่เกิดขึ้น และนำข้อมูลดังกล่าวไปใช้ประกอบการฝึกออกเสียงด้วยตนเอง</p>
+<p>ทั้งนี้ SpireTeak ไม่ได้มีวัตถุประสงค์เพื่อทดแทนบทบาทของนักแก้ไขการพูด เนื่องจากการประเมิน วินิจฉัย และวางแผนการบำบัดยังจำเป็นต้องอาศัยความรู้ ความเชี่ยวชาญ และความเข้าใจในความแตกต่างของผู้รับบริการแต่ละบุคคล แต่ถูกพัฒนาขึ้นในฐานะ <b>เครื่องมือเสริม</b> ที่ช่วยเพิ่มทางเลือกในการเรียนรู้และฝึกฝน โดยเฉพาะสำหรับผู้ที่ต้องการฝึกซ้ำด้วยตนเองหรือมีข้อจำกัดในการเข้าถึงผู้เชี่ยวชาญ เพื่อสนับสนุนให้การเรียนรู้และการฝึกออกเสียงสามารถเกิดขึ้นได้อย่างต่อเนื่องและเข้าถึงได้มากยิ่งขึ้น</p>
+<h3>วัตถุประสงค์ในการทำโครงงาน</h3>
+<ol><li>เพื่อพัฒนาเว็บแอปพลิเคชันที่แสดงการเคลื่อนไหวของอวัยวะออกเสียงภาษาไทยด้วยโมเดล 3 มิติ ให้ผู้เรียนมองเห็นสิ่งที่ปกติมองไม่เห็น</li>
+<li>เพื่อสร้างเครื่องมือเสริมการฝึกออกเสียงที่เข้าถึงได้ง่ายผ่านเว็บเบราว์เซอร์ ลดข้อจำกัดด้านค่าใช้จ่ายและการเดินทาง</li>
+<li>เพื่อส่งเสริมการเรียนรู้แบบ Interactive ให้ผู้เรียนเลือกคำเอง ดูการเคลื่อนไหวของอวัยวะ และฟังเสียงไปพร้อมกัน</li></ol>
+<h3>ผู้จัดทำโครงงาน</h3>
+<div class="devs"><div class="dev">นางสาวชิรญาณ์ บุญสด<small>นักเรียนโรงเรียนชุมพลวิทยาสรรค์</small></div><div class="dev">นางสาวพิมพกานต์ แสงเหมาะ<small>นักเรียนโรงเรียนชุมพลวิทยาสรรค์</small></div></div>
+</div></section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+/* ---------- tongue poses: 6 points (x,y) root→tip ---------- */
+const P={
+REST:[-2.6,-2.4,-1.9,-0.9,-0.8,-0.5,0.8,-0.6,2.3,-0.8,3.2,-1.0],
+LOW:[-2.6,-2.4,-1.9,-1.6,-0.8,-1.5,0.8,-1.6,2.3,-1.6,3,-1.5],
+FH:[-2.6,-2.2,-1.9,-0.6,-0.6,0.3,1,0.8,2.4,0.7,3.2,0.3],
+BH:[-2.6,-2,-1.9,0,-1,0.7,0.4,0.3,1.8,-0.6,2.6,-1],
+MF:[-2.6,-2.3,-1.9,-1,-0.6,-0.4,1,-0.2,2.4,-0.3,3.2,-0.6],
+OF:[-2.6,-2.4,-1.9,-1.3,-0.6,-1.1,1,-0.9,2.4,-0.8,3.2,-0.9],
+MB:[-2.6,-2.3,-1.9,-0.5,-0.9,-0.1,0.5,-0.7,2,-1.1,2.9,-1.3],
+OB:[-2.6,-2.3,-1.9,-1,-0.9,-0.8,0.5,-1.3,2,-1.5,2.8,-1.5],
+VEL:[-2.6,-2,-1.9,0.3,-1,1,0.3,0.2,1.8,-0.7,2.6,-1],
+PAL:[-2.6,-2.2,-1.9,-0.7,-0.4,0.2,1,1.4,2.4,0.9,3.1,0.2],
+ALV:[-2.6,-2.3,-1.9,-1,-0.8,-0.6,0.8,-0.2,2.3,0.5,3.4,1.1],
+FRC:[-2.6,-2.3,-1.9,-1,-0.8,-0.6,0.8,-0.4,2.3,0.3,3.5,0.75]};
+const D={jw:.12,rd:0,sp:0,cl:0,ld:0,ct:0,cx:0,cy:0,air:0,vo:1,tr:0};
+const U=(l,note,tp,o,d)=>Object.assign({l,note,tp:P[tp],d:d||.2},D,o);
+/* ---------- consonants ---------- */
+const A='ขฃคฅฆฉชฌถฐฑฒทธพผภ';
+const T=[
+['กขฃคฅฆ','VEL','โคนลิ้นยกแตะเพดานอ่อน',{ct:1,cx:-1,cy:1.05,vo:0}],
+['ง','VEL','โคนลิ้นแตะเพดานอ่อน เสียงขึ้นจมูก',{ct:1,cx:-1,cy:1.05}],
+['จฉชฌ','PAL','กลางลิ้นแตะเพดานแข็ง',{ct:1,cx:1.1,cy:1.6,vo:0}],
+['ยญ','PAL','กลางลิ้นยกใกล้เพดานแข็ง',{sp:.5,jw:.2}],
+['ดฎ','ALV','ปลายลิ้นแตะปุ่มเหงือกหลังฟันบน',{ct:1,cx:3.5,cy:1.3}],
+['ตฏถฐฑฒทธ','ALV','ปลายลิ้นแตะปุ่มเหงือกหลังฟันบน',{ct:1,cx:3.5,cy:1.3,vo:0}],
+['นณ','ALV','ปลายลิ้นแตะปุ่มเหงือก เสียงขึ้นจมูก',{ct:1,cx:3.5,cy:1.3}],
+['ลฬ','ALV','ปลายลิ้นแตะปุ่มเหงือก ลมออกข้างลิ้น',{ct:1,cx:3.5,cy:1.3}],
+['ร','ALV','ปลายลิ้นรัวใกล้ปุ่มเหงือก',{tr:1}],
+['ซศษส','FRC','ปลายลิ้นใกล้ปุ่มเหงือก ลมเสียดแทรกออกทางฟัน',{air:1,vo:0,jw:.05}],
+['บ','REST','ริมฝีปากสองข้างปิดสนิท',{cl:1,jw:.02}],
+['ปพผภ','REST','ริมฝีปากสองข้างปิดสนิท',{cl:1,vo:0,jw:.02}],
+['ม','REST','ริมฝีปากปิด เสียงขึ้นจมูก',{cl:1,jw:.02}],
+['ฟฝ','REST','ริมฝีปากล่างแตะฟันบน',{ld:1,air:1,vo:0,jw:.1}],
+['ว','BH','ริมฝีปากห่อกลม',{rd:1,jw:.2}],
+['หฮ','REST','ลมออกจากลำคอ',{air:1,vo:0}],
+['อ','REST','เริ่มเสียงที่ลำคอ',{}]];
+function cons(ch,coda){const r=T.find(x=>x[0].includes(ch));if(!r)return U(ch,'','REST',{},.1);
+ const o={...r[3]};if(A.includes(ch)&&!coda)o.air=2;if(coda)o.air=0;
+ const u=U(ch+(coda?' (ตัวสะกด)':''),(coda?'ตัวสะกด: ':'')+r[2],r[1],o,coda?.15:o.air==2?.24:.17);u.free=r[1]=='REST'||r[1]=='BH';return u}
+const CD=[['กขคฆ','ก'],['ดตจชซฎฏฐฑฒถทธศษส','ต'],['บปพฟภ','ป'],['ง','ง'],['นณญลฬร','น'],['ม','ม'],['ย','ย'],['ว','ว']];
+const coda=c=>{const r=CD.find(x=>x[0].includes(c));return r?cons(r[1],1):null};
+/* ---------- vowels ---------- */
+const V={a:['อะ/อา','LOW',.9,0,0,'ปากอ้ากว้าง ลิ้นราบต่ำ'],
+i:['อิ/อี','FH',.2,0,.9,'ปากยิ้มกว้าง ลิ้นหน้ายกสูงใกล้เพดานแข็ง'],
+'ɯ':['อึ/อือ','BH',.22,0,.3,'ลิ้นหลังยกสูง ริมฝีปากไม่ห่อ'],
+u:['อุ/อู','BH',.22,1,0,'ลิ้นหลังยกสูง ริมฝีปากห่อยื่น'],
+e:['เอะ/เอ','MF',.45,0,.5,'ปากเปิดครึ่ง ลิ้นหน้าระดับกลาง'],
+'ɛ':['แอะ/แอ','OF',.7,0,.6,'ปากเปิดกว้าง ลิ้นหน้าต่ำ'],
+o:['โอะ/โอ','MB',.45,.9,0,'ปากห่อกลม ลิ้นหลังระดับกลาง'],
+'ɔ':['เอาะ/ออ','OB',.7,.6,0,'ปากเปิดและห่อ ลิ้นหลังต่ำ'],
+'ɤ':['เออะ/เออ','MB',.4,0,0,'ปากเปิดครึ่ง ไม่ห่อ ลิ้นหลังระดับกลาง']};
+const vow=(k,L)=>{const v=V[k],u=U(v[0].split('/')[L?1:0],v[5],v[1],{jw:v[2],rd:v[3],sp:v[4]},L?.45:.28);u.tp=u.tp.map((x,i)=>P.REST[i]+(x-P.REST[i])*.7);return u};
+/* ---------- Thai syllable parser (simple rules) ---------- */
+const LV='เแโไใ',CON=/[ก-ฮ]/;
+const DICT={'สบาย':'สะบาย','สวัสดี':'สะหวัดดี','ขอบคุณ':'ขอบคุน','ภาษา':'พาสา','ภาษาไทย':'พาสาไท','ประเทศ':'ปฺระเทด'.replace('ฺ',''),'มหาวิทยาลัย':'มะหาวิดทะยาลัย'};
+function syl(w,i,out){
+ let lead='';if(LV.includes(w[i]))lead=w[i++];
+ let c=w[i++];if(!c||!CON.test(c))return i;
+ if((c=='ห'&&'งญนมยรลว'.includes(w[i]||'#'))||(c=='อ'&&w[i]=='ย'))c=w[i++];
+ out.push(cons(c));
+ let m=w[i],m2=w[i+1];
+ if('กขคตปพผ'.includes(c)&&m&&'รลว'.includes(m)&&(lead||/[ะาิีึืุูัำอ็]/.test(m2||'')||(m2&&!w[i+2]))){out.push(cons(m));i++}
+ const ch=w[i],nx=w[i+1];let k,L=0;
+ const V2=(a,b)=>{out.push(vow(a,0));out.push(vow(b,0))};
+ if(lead=='ไ'||lead=='ใ'){V2('a','i');if(ch=='ย')i++;return i}
+ if(lead=='เ'){
+  if(ch=='ี'&&nx=='ย'){V2('i','a');i+=2}
+  else if(ch=='ื'&&nx=='อ'){V2('ɯ','a');i+=2}
+  else if(ch=='า'&&nx=='ะ'){k='ɔ';i+=2}
+  else if(ch=='า'){V2('a','u');return i+1}
+  else if(ch=='ะ'||ch=='็'){k='e';i++}
+  else if(ch=='ิ'||ch=='อ'){k='ɤ';L=1;i++}
+  else{k='e';L=1}}
+ else if(lead=='แ'){if(ch=='ะ'||ch=='็'){k='ɛ';i++}else{k='ɛ';L=1}}
+ else if(lead=='โ'){if(ch=='ะ'){k='o';i++}else{k='o';L=1}}
+ else if(ch=='ะ'){k='a';i++}
+ else if(ch=='า'){k='a';L=1;i++}
+ else if(ch=='ั'){if(nx=='ว'){V2('u','a');i+=2}else{k='a';i++}}
+ else if(ch=='ิ'){k='i';i++}else if(ch=='ี'){k='i';L=1;i++}
+ else if(ch=='ึ'){k='ɯ';i++}else if(ch=='ื'){k='ɯ';L=1;i++;if(w[i]=='อ')i++}
+ else if(ch=='ุ'){k='u';i++}else if(ch=='ู'){k='u';L=1;i++}
+ else if(ch=='ำ'){out.push(vow('a',0));out.push(cons('ม',1));return i+1}
+ else if(ch=='อ'){k='ɔ';L=1;i++}
+ else k='o';
+ if(k)out.push(vow(k,L));
+ const cd=w[i]&&coda(w[i]);if(cd){out.push(cd);i++}
+ return i}
+const EN={a:'a',e:'e',i:'i',o:'o',u:'u'},EC={b:'บ',c:'ก',d:'ด',f:'ฟ',g:'ก',h:'ห',j:'จ',k:'ก',l:'ล',m:'ม',n:'น',p:'ป',q:'ก',r:'ร',s:'ซ',t:'ต',v:'ฟ',w:'ว',x:'ซ',y:'ย',z:'ซ'};
+function toUnits(s){const out=[];
+ const seg=window.Intl&&Intl.Segmenter?[...new Intl.Segmenter('th',{granularity:'word'}).segment(s)].map(x=>x.segment):s.split(/(\s+)/);
+ for(let w of seg){
+  if(!w.trim()){out.push(U('·','หยุดสั้นๆ','REST',{vo:0,jw:.06},.15));continue}
+  if(/[A-Za-z]/.test(w)){for(const c of w.toLowerCase()){if(EN[c])out.push(vow(EN[c],0));else if(EC[c])out.push(cons(EC[c]))}continue}
+  w=(DICT[w]||w).replace(/.์/g,'').replace(/[่้๊๋ๆฯ]/g,'');
+  let i=0;while(i<w.length){const n=syl(w,i,out);i=Math.max(n,i+1)}}
+ return out}
+/* ---------- 3D scene ---------- */
+const stage=$('#stage');
+const R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));stage.prepend(R.domElement);
+const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(35,1,1,100);
+S.add(new THREE.AmbientLight(0xffffff,.55),new THREE.HemisphereLight(0xffffff,0x9fb4c0,.4));const dl=new THREE.DirectionalLight(0xffffff,.7);dl.position.set(3,6,10);S.add(dl);
+const root=new THREE.Group();S.add(root);
+const slab=(pts,d,dx=0)=>{const g=new THREE.ExtrudeGeometry(new THREE.Shape(pts.map(p=>new THREE.Vector2(p[0]+dx,p[1]))),{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return g};
+const cut=new THREE.MeshStandardMaterial({color:0xf2b4a8,roughness:.8}),skin=new THREE.MeshStandardMaterial({color:0xe6b08e,roughness:.7});
+const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.5});
+root.add(new THREE.Mesh(slab([[-3.2,-5],[-3.2,1.3],[-1,1.1],[1.5,1.7],[3.6,1.4],[3.9,1],[3.9,0],[4.5,0],[5,.15],[5.2,.7],[5.1,1.3],[5.3,3.4],[5.4,5],[5.2,7],[4,8.2],[1,8.9],[-2.5,8.5],[-4.8,6],[-5.2,2],[-4.8,-1],[-4.6,-5]],3.8),[cut,skin]));
+const SIL=[[-4.6,-5],[-4.8,-1],[-5.2,2],[-4.8,6],[-2.5,8.5],[1,8.9],[4,8.2],[5.2,7],[5.4,5],[5.3,3.4],[5.1,1.3],[5.2,.7],[5.1,-1.2],[4.5,-2.4],[3,-3.2],[-.5,-3.4],[-2.6,-4.8],[-2.6,-5]];
+const HOLE=[[-3,-2.6],[-3,1.5],[3.6,1.5],[4.2,1.2],[4.6,.8],[4.6,-1],[4.2,-1.8],[3,-2.5],[-.5,-2.7]];
+const V2d=a=>a.map(p=>new THREE.Vector2(p[0],p[1]));
+function cheek(hole,z0,b,flip){const sh=new THREE.Shape(V2d(SIL));if(hole)sh.holes.push(new THREE.Path(V2d(HOLE)));
+ const m=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:1.1,bevelEnabled:true,bevelThickness:b,bevelSize:b,bevelOffset:-b,bevelSegments:4}),skin);m.position.z=z0;root.add(m)}
+cheek(0,-2.55,.45);cheek(1,1.7,.2);
+const back=new THREE.Mesh(new THREE.PlaneGeometry(7.7,4.3),new THREE.MeshStandardMaterial({color:0xc4607a,roughness:.8}));back.position.set(.65,-.55,-.95);root.add(back);
+const EY=[];
+[-1.5,1.5].forEach(z=>{const g=new THREE.Group();g.position.set(5.2,4.5,z);root.add(g);EY.push(g);
+ const e=new THREE.Mesh(new THREE.SphereGeometry(.72,24,16),mat(0xffffff));e.scale.set(.5,1,.9);g.add(e);
+ const q=new THREE.Mesh(new THREE.SphereGeometry(.48,20,14),mat(0x2a2233));q.scale.set(.5,1,.9);q.position.set(.18,0,0);g.add(q);
+ const h=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),new THREE.MeshBasicMaterial({color:0xffffff}));h.position.set(.5,.2,.18);g.add(h);
+ const ck=new THREE.Mesh(new THREE.SphereGeometry(.9,16,12),mat(0xeaa592));ck.scale.set(.35,.6,.9);ck.position.set(5.2,2.75,z*1.3);root.add(ck);
+ const ear=new THREE.Mesh(new THREE.SphereGeometry(.7,12,10),skin);ear.scale.set(.6,1.2,.4);ear.position.set(-1.2,2.5,z*2.0);root.add(ear)});
+const nose=new THREE.Mesh(new THREE.SphereGeometry(.5,16,12),mat(0xe0a584));nose.scale.set(1.1,.9,.95);nose.position.set(5.75,3,0);root.add(nose);
+
+const jaw=new THREE.Group();jaw.position.set(-2,0,0);root.add(jaw);
+jaw.add(new THREE.Mesh(slab([[-2.8,-1.6],[1,-1.4],[3.2,-1.1],[3.4,-.3],[4.5,-.3],[4.9,-.35],[5,-1.2],[4.5,-2.4],[3,-3.2],[-.5,-3.4],[-2.6,-4.8],[-2.8,-4.8]],3.8,2),[cut,skin]));
+const tw=mat(0xfdfdf5);
+const ut=new THREE.Mesh(new THREE.BoxGeometry(.6,1,4.1),tw);ut.position.set(4.2,0,0);root.add(ut);
+const lt=new THREE.Mesh(new THREE.BoxGeometry(1.1,.7,4.1),tw);lt.position.set(3.95+2,.05,0);jaw.add(lt);
+const lipM=mat(0xf0607a);
+const ul=new THREE.Mesh(new THREE.SphereGeometry(.5,20,14),lipM);ul.scale.set(.8,.55,3.6);root.add(ul);
+const ll=new THREE.Mesh(new THREE.SphereGeometry(.5,20,14),lipM);ll.scale.set(.8,.6,3.6);jaw.add(ll);
+const tm=new THREE.Mesh(new THREE.BufferGeometry(),mat(0xff7d94));root.add(tm);
+const glow=new THREE.Mesh(new THREE.SphereGeometry(.3,16,12),new THREE.MeshBasicMaterial({color:0xffd24a,transparent:true,opacity:0}));glow.position.z=1.05;root.add(glow);
+const vc=new THREE.Mesh(new THREE.SphereGeometry(.38,16,12),new THREE.MeshBasicMaterial({color:0xff9f1c,transparent:true,opacity:0}));vc.position.set(-3,-2.4,1.1);root.add(vc);
+const N=70,pp=new Float32Array(N*3).fill(999),pv=[],pl=new Float32Array(N);
+for(let i=0;i<N;i++)pv.push([0,0,0]);
+const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+root.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0x7cc4ff,size:.5,transparent:true,opacity:.85,depthWrite:false})));
+const TH=[1.5,1.9,1.7,1.3,.8,.4],th=u=>{const f=u*5,i=Math.min(4,f|0);return TH[i]+(TH[i+1]-TH[i])*(f-i)};
+function buildTongue(p){
+ const c=new THREE.SplineCurve(p.map(q=>new THREE.Vector2(q[0],q[1]))).getPoints(18);
+ const bot=c.map((q,i)=>new THREE.Vector2(q.x,q.y-th(i/18))).reverse();
+ const g=new THREE.ExtrudeGeometry(new THREE.Shape(c.concat(bot)),{depth:2,bevelEnabled:false});g.translate(0,0,-1);
+ tm.geometry.dispose();tm.geometry=g}
+/* ---------- animation state ---------- */
+const KS=['jw','rd','sp','cl','ld','ct','cx','cy','vo','tr'];
+const RESTU=U('','','REST',{jw:.06,vo:0});
+let cur={...RESTU,tp:[...P.REST]},seq=[],playing=false,endT=0,t0=0,scale=1,spk=false,DUR={},ai=-1,emit=0,last=0;
+let yaw=-.55,yawT=-.55,pitch=.06,zoom=23;
+function desc(u){const j=u.jw>.6?'อ้ากว้าง':u.jw>.3?'เปิดครึ่ง':'เกือบปิด';
+ const lp=u.cl?'ปิดสนิท':u.ld?'ล่างแตะฟันบน':u.rd>.5?'ห่อกลม':u.sp>.5?'ยิ้มกว้าง':'ผ่อนปกติ';
+ const ar=u.air>1?'ลมพ่นแรง':u.air?'ลมแผ่ว':'ไม่มีลมพ่น';
+ return '<b>'+u.l+'</b>'+u.note+'<div class="g"><span>กราม: '+j+'</span><span>ริมฝีปาก: '+lp+'</span><span>ลม: '+ar+'</span><span>คอ: '+(u.vo?'สั่น (เสียงก้อง)':'ไม่สั่น')+'</span></div>'}
+function play(units,dur){seq=[];let t=.15;const sum=units.reduce((a,u)=>a+u.d,0)*scale,f=dur?Math.max(.5,Math.min(2.5,(dur-.3)/sum)):1;
+ let pt=P.REST;for(const u0 of units){const u=u0.free?{...u0,tp:pt}:u0;pt=u.tp;seq.push({u,s:t});t+=u.d*scale*f}endT=t+.3;t0=performance.now()/1000;playing=true;ai=-1}
+function frame(ms){
+ const dt=Math.min(.05,(ms-last)/1000);last=ms;const now=ms/1000;
+ let tg=RESTU,idx=-1;
+ if(playing){const tt=now-t0;for(let i=0;i<seq.length;i++)if(seq[i].s<=tt)idx=i;
+  if(idx>=0)tg=tt<endT-.3?seq[idx].u:spk?{...seq[idx].u,air:0}:RESTU;
+  if(tt>endT&&!spk){playing=false;idx=-1}}
+ if(idx!==ai){ai=idx;document.querySelectorAll('.chip').forEach((c,i)=>c.classList.toggle('on',i===idx));
+  if(idx>=0)$('#now').innerHTML=desc(tg)}
+ const k=Math.min(1,dt*20/Math.max(1,scale*.6));
+ for(const key of KS)cur[key]+=(tg[key]-cur[key])*k;
+ cur.tp=cur.tp.map((v,i)=>v+(tg.tp[i]-v)*k);
+ const pts=[];for(let j=0;j<6;j++){let y=cur.tp[2*j+1]-cur.jw*.9*(.3+.14*j);if(j==5)y+=Math.sin(now*60)*.3*cur.tr;pts.push([cur.tp[2*j],y])}
+ buildTongue(pts);tpts=pts;
+ jaw.rotation.z=-cur.jw*.4;{const bl=(now%3.8)<.13?.12:1;EY.forEach(g=>g.scale.y=bl)}
+ ul.position.set(4.95+.55*cur.rd-.15*cur.sp+.12*cur.cl,.45-.32*cur.cl,0);ul.scale.set(.8+.2*cur.cl,.55-.12*cur.cl,3.6);ll.scale.set(.8+.2*cur.cl,.6-.12*cur.cl,3.6);
+ ll.position.set(6.95+.55*cur.rd-.15*cur.sp-.6*cur.ld,-.6+.34*cur.cl+.55*cur.ld,0);
+ glow.position.set(cur.cx,cur.cy,1.05);glow.material.opacity=cur.ct*(.6+.4*Math.sin(now*12));
+ vc.material.opacity=cur.vo*(.5+.5*Math.sin(now*40))*(playing?1:0);
+ if(tg.air>0&&playing){emit+=dt*tg.air*35;while(emit>1){emit--;const i=pl.findIndex(l=>l<=0);if(i<0)break;
+  pl[i]=.7;pp.set([5.6,-.1+Math.random()*.4,(Math.random()-.5)*.5],i*3);pv[i]=[3+Math.random()*1.5,(Math.random()-.5)*.8,(Math.random()-.5)*.3]}}
+ for(let i=0;i<N;i++){if(pl[i]>0){pl[i]-=dt;if(pl[i]<=0)pp[i*3]=999;else{pp[i*3]+=pv[i][0]*dt;pp[i*3+1]+=pv[i][1]*dt;pp[i*3+2]+=pv[i][2]*dt}}}
+ pg.attributes.position.needsUpdate=true;
+ yaw+=(yawT-yaw)*Math.min(1,dt*8);root.rotation.set(pitch,yaw,0);
+ cam.position.set(0,2,zoom);cam.lookAt(.2,2,0);
+ if(labelsOn){root.updateMatrixWorld(true);layoutLabels()}R.render(S,cam);requestAnimationFrame(frame)}
+function size(){const w=stage.clientWidth,h=stage.clientHeight;R.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(size).observe(stage);size();requestAnimationFrame(frame);
+/* ---------- input ---------- */
+let dr=null;
+stage.addEventListener('pointerdown',e=>{dr=[e.clientX,e.clientY];stage.setPointerCapture(e.pointerId);stage.style.cursor='grabbing'});
+stage.addEventListener('pointermove',e=>{if(!dr)return;yawT+=(e.clientX-dr[0])*.01;pitch=Math.max(-.5,Math.min(.5,pitch+(e.clientY-dr[1])*.005));yaw=yawT;dr=[e.clientX,e.clientY]});
+stage.addEventListener('pointerup',()=>{dr=null;stage.style.cursor='grab'});
+stage.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(10,Math.min(32,zoom+e.deltaY*.02))},{passive:false});
+document.querySelectorAll('[data-y]').forEach(b=>b.onclick=()=>{yawT=+b.dataset.y;pitch=.06});
+function say(){
+ const raw=$('#q').value.trim();if(!raw)return;
+ const [word,resp]=raw.split('=').map(s=>s.trim());const units=toUnits(resp||word);
+ if(!units.length)return;scale=$('#slow').checked?2:1;
+ $('#chips').innerHTML=units.map(u=>'<span class="chip">'+u.l+'</span>').join('');
+ $('#now').textContent='กำลังพูด…';
+ if(!('speechSynthesis' in window)){play(units);return}
+ speechSynthesis.cancel();playing=false;spk=false;
+ const key=word+'|'+scale,u=new SpeechSynthesisUtterance(word),en=/[A-Za-z]/.test(word)&&!/[ก-๙]/.test(word);
+ u.lang=en?'en-US':'th-TH';u.rate=scale>1?.55:.85;
+ let go=false,ok=false,ts=0;window.CU=u;
+ const start=()=>{if(!go){go=true;ts=performance.now();play(units,DUR[key])}};
+ u.onstart=()=>{if(window.CU!==u)return;ok=true;spk=true;start()};
+ u.onend=u.onerror=()=>{if(window.CU!==u)return;spk=false;if(ok)DUR[key]=(performance.now()-ts)/1000;playing=false};
+ setTimeout(()=>{if(window.CU===u)start()},1200);speechSynthesis.speak(u)}
+$('#go').onclick=say;$('#q').onkeydown=e=>{if(e.key=='Enter')say()};
+['สวัสดี','ขอบคุณ','แมว','ปลา','ช้าง','ไก่','สบาย','มา','พี่','ซื้อ'].forEach(w=>{const b=document.createElement('button');b.textContent=w;b.onclick=()=>{$('#q').value=w;say()};$('#ex').append(b)});
+
+
+let tpts=[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]],labelsOn=false;
+const SEC={t1:'s1',t2:'s2',t3:'s3'};
+function show(id){$('#nav').hidden=id=='s0';['s0','s1','s2','s3'].forEach(x=>$('#'+x).hidden=x!=id);['t1','t2','t3'].forEach(t=>$('#'+t).classList.toggle('on',SEC[t]==id));
+ if(id=='s1')size();scrollTo(0,0);if(id!='s1'){window.CU=null;if(window.speechSynthesis)speechSynthesis.cancel();playing=false;spk=false}}
+['t1','t2','t3'].forEach(t=>$('#'+t).onclick=()=>show(SEC[t]));$('#start').onclick=()=>show('s1');$('#home').onclick=()=>show('s0');
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('sel',x==b));$('#robo').hidden=b.dataset.m!='robot'});
+const V3=THREE.Vector3,wp=(x,y,z)=>root.localToWorld(new V3(x,y,z)),jp=(x,y,z)=>jaw.localToWorld(new V3(x,y,z));
+const ORG=[['ริมฝีปากบน',()=>wp(5,.45,1.6)],['ริมฝีปากล่าง',()=>jp(7,-.6,1.6)],['ฟันบน',()=>wp(4.2,-.3,2.05)],['ฟันล่าง',()=>jp(5.95,.05,2.05)],['ปุ่มเหงือก',()=>wp(3.7,1.2,1.9)],['เพดานแข็ง',()=>wp(1.2,1.65,1.9)],['เพดานอ่อน',()=>wp(-1.4,1.15,1.9)],
+['ปลายลิ้น',()=>wp(tpts[5][0],tpts[5][1]-.2,1)],['กลางลิ้น',()=>wp(tpts[3][0],tpts[3][1]-.3,1)],['โคนลิ้น',()=>wp(tpts[1][0],tpts[1][1]-.4,1)],['กราม',()=>jp(2,-2.4,1.9)],['เส้นเสียง',()=>wp(-3,-2.4,1.1)]];
+const SV='http://www.w3.org/2000/svg',svg=document.createElementNS(SV,'svg');svg.id='lines';stage.append(svg);
+const LBL=[],LN=[],DT=[];
+ORG.forEach(o=>{const d=document.createElement('div');d.className='lbl';d.textContent=o[0];stage.append(d);LBL.push(d);
+ const l=document.createElementNS(SV,'line');l.setAttribute('stroke','#7f95a3');l.setAttribute('stroke-width','1.2');svg.append(l);LN.push(l);
+ const c=document.createElementNS(SV,'circle');c.setAttribute('r','4');c.setAttribute('fill','#f7b32b');c.setAttribute('stroke','#fff');svg.append(c);DT.push(c)});
+function layoutLabels(){const w=stage.clientWidth,h=stage.clientHeight,on=labelsOn&&Math.cos(yaw)>.25;
+ const it=ORG.map((o,i)=>{const v=o[1]().project(cam);return{i,x:(v.x*.5+.5)*w,y:(-v.y*.5+.5)*h}});
+ [it.filter(t=>t.x<w/2),it.filter(t=>t.x>=w/2)].forEach((g,gi)=>{g.sort((a,b)=>a.y-b.y);let py=-99;
+  for(const t of g){const el=LBL[t.i],ln=LN[t.i],dt=DT[t.i];
+   if(!on){el.style.display='none';ln.style.display=dt.style.display='none';continue}
+   el.style.display='block';ln.style.display=dt.style.display='';
+   const ty=Math.max(t.y,py+26,14);py=ty;const lw=el.offsetWidth,lx=gi?w-8-lw:8;
+   el.style.left=lx+'px';el.style.top=(ty-11)+'px';
+   ln.setAttribute('x1',t.x);ln.setAttribute('y1',t.y);ln.setAttribute('x2',gi?lx:lx+lw);ln.setAttribute('y2',ty);dt.setAttribute('cx',t.x);dt.setAttribute('cy',t.y)}})}
+$('#lab').onclick=()=>{labelsOn=!labelsOn;$('#lab').classList.toggle('on',labelsOn);$('#lab').setAttribute('aria-pressed',labelsOn);if(!labelsOn){root.updateMatrixWorld(true);layoutLabels()}};
+$('#btconn').onclick=async()=>{const m=$('#btmsg');try{if(!navigator.bluetooth){m.textContent='อุปกรณ์หรือเบราว์เซอร์นี้ไม่รองรับการเชื่อมต่อบลูทูธ';return}const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true});m.textContent='เลือกอุปกรณ์แล้ว: '+(d.name||'ไม่ทราบชื่อ')+' (การส่งคำสั่งไปยังหุ่นยนต์ยังอยู่ระหว่างพัฒนา)'}catch(e){m.textContent='ยังไม่ได้เชื่อมต่อ กรุณาลองอีกครั้ง'}};
+</script></body></html>
