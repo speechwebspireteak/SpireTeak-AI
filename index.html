@@ -394,7 +394,7 @@ function layoutLabels(){const w=stage.clientWidth,h=stage.clientHeight,on=labels
    ln.setAttribute('x1',t.x);ln.setAttribute('y1',t.y);ln.setAttribute('x2',gi?lx:lx+lw);ln.setAttribute('y2',ty);dt.setAttribute('cx',t.x);dt.setAttribute('cy',t.y)}})}
 $('#lab').onclick=()=>{labelsOn=!labelsOn;$('#lab').classList.toggle('on',labelsOn);$('#lab').setAttribute('aria-pressed',labelsOn);if(!labelsOn){root.updateMatrixWorld(true);layoutLabels()}};
 $('#btconn').onclick=async()=>{const m=$('#btmsg');try{if(!navigator.bluetooth){m.textContent='อุปกรณ์หรือเบราว์เซอร์นี้ไม่รองรับการเชื่อมต่อบลูทูธ';return}const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true});m.textContent='เลือกอุปกรณ์แล้ว: '+(d.name||'ไม่ทราบชื่อ')+' (การส่งคำสั่งไปยังหุ่นยนต์ยังอยู่ระหว่างพัฒนา)'}catch(e){m.textContent='ยังไม่ได้เชื่อมต่อ กรุณาลองอีกครั้ง'}};
-const FEEDBACK_KEY='';/* วางรหัส Access Key จาก web3forms.com ระหว่างเครื่องหมายคำพูด */
+const FEEDBACK_KEY='51f73073-5f2e-4d24-abc5-1c28e61cf7b0';/* วางรหัส Access Key จาก web3forms.com ระหว่างเครื่องหมายคำพูด */
 $('#tgo').onclick=()=>show('s4');
 $('#tx').onclick=()=>{toastX=true;$('#toast').hidden=true};
 $('#fb').onsubmit=async e=>{e.preventDefault();const f=e.target,m=$('#fbmsg'),b=$('#fbsend');
