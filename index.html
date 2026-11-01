@@ -606,7 +606,7 @@ function render(R){
  const o=R.out,G=o.filter(x=>x.g.s==='g').length,Y=o.filter(x=>x.g.s==='y').length,N=o.filter(x=>x.g.s==='n'),chk=G+Y;
  const nl=[...new Set(N.map(x=>lab(x.u)))];
  $('#camsum').textContent=chk?'จากเสียงที่กล้องตรวจได้ '+chk+' จาก '+o.length+' เสียง ตรงท่าเป้าหมาย '+G+' เสียง ใกล้เคียง '+Y+' เสียง'+(nl.length?' ส่วนเสียง '+nl.join(' ')+' ตรวจไม่ได้':'')+' ลองพูดซ้ำโดยเปิด “ขยับช้า” เพื่อดูทีละเสียง':'คำนี้ประกอบด้วยเสียงที่ใช้ลิ้นเป็นหลักทั้งหมด กล้องจึงตรวจไม่ได้ ให้สังเกตจากโมเดล 3 มิติแทน';
- $('#camres').innerHTML=o.map(x=>'<li class="rs '+x.g.s+'"><span class="rl">'+esc(x.u.l)+'</span><span class="rb">'+(x.g.s==='g'?'ตรงท่า':x.g.s==='y'?'ใกล้เคียง':'ตรวจไม่ได้')+'</span><span class="rt">'+esc(x.g.m)+'</span>'+(x.g.mic?'<span class="mic">'+esc(x.g.mic)+'</span>':'')+'</li>').join('')}
+ $('#camres').innerHTML=o.map(x=>'<li class="rs '+(x.g.s==='n'?'gr':x.g.s)+'"><span class="rl">'+esc(x.u.l)+'</span><span class="rb">'+(x.g.s==='g'?'ตรงท่า':x.g.s==='y'?'ใกล้เคียง':'ตรวจไม่ได้')+'</span><span class="rt">'+esc(x.g.m)+'</span>'+(x.g.mic?'<span class="mic">'+esc(x.g.mic)+'</span>':'')+'</li>').join('')}
 $('#camrun').onclick=async()=>{
  if(busy||!camOn)return;
  const raw=$('#q').value.trim();if(!raw){cmsg('พิมพ์คำที่ต้องการฝึกในช่องค้นหาด้านบนก่อน');return}
